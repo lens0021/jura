@@ -12,9 +12,10 @@ import { file_globstar } from "github.com/lens0021/amber-snippets/main/main.ab"
 echo trust file_globstar("**/*.ab")
 ```
 
-The path is `github.com/{repository_owner}/{repository}/{git_ref}/{path_to_file}/{file}`.
+The form of path following `from` is `github.com/{repository_owner}/{repository}/{git_ref}/{path_to_file}/{file}`.
+(Currently, only the public repositories on github.com are supported)
 
-Then, run the jura
+Then, run the Jura
 
 ```console
 $ jura install
