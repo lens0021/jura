@@ -1,0 +1,734 @@
+#!/usr/bin/env bash
+# Written in [Amber](https://amber-lang.com/)
+# version: 0.4.0-alpha
+# date: 2024-12-28 19:50:21
+array_find__0_v0() {
+
+# bshchk (https://git.blek.codes/blek/bshchk)
+deps=('[' '[' 'return' 'true' 'bc' 'sed' 'return' 'bc' 'sed' 'return' 'return' '[' 'sed' '[' 'bc' 'sed' 'sed' 'return' 'sed' 'return' 'return' 'return' 'return' 'sed' 'return' 'sed' 'return' 'return' '[' 'return' '[' 'sed' '[' 'bc' 'sed' 'sed' 'sed' '[' '[' 'return' 'return' '[' 'return' '[' 'return' '[' '[' 'return' 'return' '[' '[' 'return' 'return' '[' 'return' 'return' '[' 'return' 'return' '[' '[' 'tar' '[' 'return' '[' 'tar' '[' 'return' '[' 'tar' '[' 'return' '[' 'bunzip2' '[' 'return' '[' 'dpkg-deb' '[' 'return' '[' 'gunzip' '[' 'return' '[' 'unrar' '[' 'return' '[' 'rpm2cpio' 'cpio' '[' 'return' '[' 'tar' '[' 'return' '[' 'xz' '[' 'return' '[' '7z' '[' 'return' '[' 'unzip' '[' 'return' 'return' 'return' '[' '[' 'return' 'return' '[' 'curl' '[' 'wget' '[' 'aria2c' 'return' 'return' 'shopt' 'bc' 'sed' 'shopt' 'eval' '[' 'return' '[' 'shopt' 'shopt' 'return' '[' 'bc' 'sed' '[' '[' 'bc' 'sed' '[' '[' '[' 'return' 'bc' 'sed' 'return' 'return' '[' 'bc' 'sed' 'return' '[' 'return' 'return' '[' 'return' 'mkdir' 'mv' 'rm' 'rmdir' '[' 'bc' 'sed' 'bc' 'sed' 'bc' 'sed' 'true' '[' 'bc' 'sed' '[' 'bc' 'sed' 'dirname' 'mkdir' 'ln' '[' '[' 'return' '[' 'return' '[' 'bc' 'sed' '[' 'bc' 'sed' '[' '[' 'bc' 'sed' '[' '[' 'bc' 'sed' '[' 'exit' 'true')
+non_ok=()
+
+for d in $deps
+do
+    if ! command -v $d > /dev/null 2>&1; then
+        non_ok+=$d
+    fi
+done
+
+if (( ${#non_ok[@]} != 0 )); then
+    >&2 echo "RDC Failed!"
+    >&2 echo "  This program requires these commands:"
+    >&2 echo "  > $deps"
+    >&2 echo "    --- "
+    >&2 echo "  From which, these are missing:"
+    >&2 echo "  > $non_ok"
+    >&2 echo "Make sure that those are installed and are present in \$PATH."
+    exit 1
+fi
+
+unset non_ok
+unset deps
+# Dependencies are OK at this point
+
+
+    local array=("${!1}")
+    local value=$2
+    index=0
+    for element in "${array[@]}"; do
+        if [ $(
+            [ "_${value}" != "_${element}" ]
+            echo $?
+        ) != 0 ]; then
+            __AF_array_find0_v0=${index}
+            return 0
+        fi
+        ((index++)) || true
+    done
+    __AF_array_find0_v0=$(echo '-' 1 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+    return 0
+}
+array_contains__2_v0() {
+    local array=("${!1}")
+    local value=$2
+    array_find__0_v0 array[@] "${value}"
+    __AF_array_find0_v0__26_18="$__AF_array_find0_v0"
+    local result="$__AF_array_find0_v0__26_18"
+    __AF_array_contains2_v0=$(echo ${result} '>=' 0 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+    return 0
+}
+replace__11_v0() {
+    local source=$1
+    local search=$2
+    local replace=$3
+    __AF_replace11_v0="${source//${search}/${replace}}"
+    return 0
+}
+replace_regex__13_v0() {
+    local source=$1
+    local search=$2
+    local replace=$3
+    local extended=$4
+    replace__11_v0 "${search}" "/" "\/"
+    __AF_replace11_v0__16_18="${__AF_replace11_v0}"
+    search="${__AF_replace11_v0__16_18}"
+    replace__11_v0 "${replace}" "/" "\/"
+    __AF_replace11_v0__17_19="${__AF_replace11_v0}"
+    replace="${__AF_replace11_v0__17_19}"
+    if [ ${extended} != 0 ]; then
+        # GNU sed versions 4.0 through 4.2 support extended regex syntax,
+        # but only via the "-r" option; use that if the version information
+        # contains "GNU sed".
+        re='\bCopyright\b.+\bFree Software Foundation\b'
+        [[ $(sed --version 2>/dev/null) =~ $re ]]
+        __AS=$?
+        local flag=$(if [ $(echo $__AS '==' 0 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then echo "-r"; else echo "-E"; fi)
+        __AMBER_VAL_0=$(echo "${source}" | sed "${flag}" -e "s/${search}/${replace}/g")
+        __AS=$?
+        __AF_replace_regex13_v0="${__AMBER_VAL_0}"
+        return 0
+    else
+        __AMBER_VAL_1=$(echo "${source}" | sed -e "s/${search}/${replace}/g")
+        __AS=$?
+        __AF_replace_regex13_v0="${__AMBER_VAL_1}"
+        return 0
+    fi
+}
+split__14_v0() {
+    local text=$1
+    local delimiter=$2
+    __AMBER_ARRAY_2=()
+    local result=("${__AMBER_ARRAY_2[@]}")
+    IFS="${delimiter}" read -rd '' -a result < <(printf %s "$text")
+    __AS=$?
+    __AF_split14_v0=("${result[@]}")
+    return 0
+}
+split_lines__15_v0() {
+    local text=$1
+    split__14_v0 "${text}" "
+"
+    __AF_split14_v0__40_12=("${__AF_split14_v0[@]}")
+    __AF_split_lines15_v0=("${__AF_split14_v0__40_12[@]}")
+    return 0
+}
+join__17_v0() {
+    local list=("${!1}")
+    local delimiter=$2
+    __AMBER_VAL_3=$(
+        IFS="${delimiter}"
+        echo "${list[*]}"
+    )
+    __AS=$?
+    __AF_join17_v0="${__AMBER_VAL_3}"
+    return 0
+}
+trim_left__18_v0() {
+    local text=$1
+    __AMBER_VAL_4=$(echo "${text}" | sed -e 's/^[[:space:]]*//')
+    __AS=$?
+    __AF_trim_left18_v0="${__AMBER_VAL_4}"
+    return 0
+}
+trim_right__19_v0() {
+    local text=$1
+    __AMBER_VAL_5=$(echo "${text}" | sed -e 's/[[:space:]]*$//')
+    __AS=$?
+    __AF_trim_right19_v0="${__AMBER_VAL_5}"
+    return 0
+}
+trim__20_v0() {
+    local text=$1
+    trim_right__19_v0 "${text}"
+    __AF_trim_right19_v0__65_22="${__AF_trim_right19_v0}"
+    trim_left__18_v0 "${__AF_trim_right19_v0__65_22}"
+    __AF_trim_left18_v0__65_12="${__AF_trim_left18_v0}"
+    __AF_trim20_v0="${__AF_trim_left18_v0__65_12}"
+    return 0
+}
+text_contains__25_v0() {
+    local text=$1
+    local phrase=$2
+    __AMBER_VAL_6=$(if [[ "${text}" == *"${phrase}"* ]]; then
+        echo 1
+    fi)
+    __AS=$?
+    local result="${__AMBER_VAL_6}"
+    __AF_text_contains25_v0=$(
+        [ "_${result}" != "_1" ]
+        echo $?
+    )
+    return 0
+}
+match_regex__28_v0() {
+    local source=$1
+    local search=$2
+    local extended=$3
+    replace__11_v0 "${search}" "/" "\/"
+    __AF_replace11_v0__130_18="${__AF_replace11_v0}"
+    search="${__AF_replace11_v0__130_18}"
+    local output=""
+    if [ ${extended} != 0 ]; then
+        # GNU sed versions 4.0 through 4.2 support extended regex syntax,
+        # but only via the "-r" option; use that if the version information
+        # contains "GNU sed".
+        re='\bCopyright\b.+\bFree Software Foundation\b'
+        [[ $(sed --version 2>/dev/null) =~ $re ]]
+        __AS=$?
+        local flag=$(if [ $(echo $__AS '==' 0 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then echo "-r"; else echo "-E"; fi)
+        __AMBER_VAL_7=$(echo "${source}" | sed "${flag}" -ne "/${search}/p")
+        __AS=$?
+        output="${__AMBER_VAL_7}"
+    else
+        __AMBER_VAL_8=$(echo "${source}" | sed -ne "/${search}/p")
+        __AS=$?
+        output="${__AMBER_VAL_8}"
+    fi
+    if [ $(
+        [ "_${output}" == "_" ]
+        echo $?
+    ) != 0 ]; then
+        __AF_match_regex28_v0=1
+        return 0
+    fi
+    __AF_match_regex28_v0=0
+    return 0
+}
+starts_with__31_v0() {
+    local text=$1
+    local prefix=$2
+    __AMBER_VAL_9=$(if [[ "${text}" == "${prefix}"* ]]; then
+        echo 1
+    fi)
+    __AS=$?
+    local result="${__AMBER_VAL_9}"
+    __AF_starts_with31_v0=$(
+        [ "_${result}" != "_1" ]
+        echo $?
+    )
+    return 0
+}
+ends_with__32_v0() {
+    local text=$1
+    local suffix=$2
+    __AMBER_VAL_10=$(if [[ "${text}" == *"${suffix}" ]]; then
+        echo 1
+    fi)
+    __AS=$?
+    local result="${__AMBER_VAL_10}"
+    __AF_ends_with32_v0=$(
+        [ "_${result}" != "_1" ]
+        echo $?
+    )
+    return 0
+}
+dir_exists__43_v0() {
+    local path=$1
+    [ -d "${path}" ]
+    __AS=$?
+    if [ $__AS != 0 ]; then
+        __AF_dir_exists43_v0=0
+        return 0
+    fi
+    __AF_dir_exists43_v0=1
+    return 0
+}
+file_exists__44_v0() {
+    local path=$1
+    [ -f "${path}" ]
+    __AS=$?
+    if [ $__AS != 0 ]; then
+        __AF_file_exists44_v0=0
+        return 0
+    fi
+    __AF_file_exists44_v0=1
+    return 0
+}
+file_write__46_v0() {
+    local path=$1
+    local content=$2
+    __AMBER_VAL_11=$(echo "${content}" >"${path}")
+    __AS=$?
+    if [ $__AS != 0 ]; then
+        __AF_file_write46_v0=''
+        return $__AS
+    fi
+    __AF_file_write46_v0="${__AMBER_VAL_11}"
+    return 0
+}
+file_append__47_v0() {
+    local path=$1
+    local content=$2
+    __AMBER_VAL_12=$(echo "${content}" >>"${path}")
+    __AS=$?
+    if [ $__AS != 0 ]; then
+        __AF_file_append47_v0=''
+        return $__AS
+    fi
+    __AF_file_append47_v0="${__AMBER_VAL_12}"
+    return 0
+}
+file_extract__55_v0() {
+    local path=$1
+    local target=$2
+    file_exists__44_v0 "${path}"
+    __AF_file_exists44_v0__117_8="$__AF_file_exists44_v0"
+    if [ "$__AF_file_exists44_v0__117_8" != 0 ]; then
+        match_regex__28_v0 "${path}" "\.\(tar\.bz2\|tbz\|tbz2\)\$" 0
+        __AF_match_regex28_v0__119_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.\(tar\.gz\|tgz\)\$" 0
+        __AF_match_regex28_v0__120_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.\(tar\.xz\|txz\$\)\$" 0
+        __AF_match_regex28_v0__121_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.bz2\$" 0
+        __AF_match_regex28_v0__122_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.deb\$" 0
+        __AF_match_regex28_v0__123_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.gz\$" 0
+        __AF_match_regex28_v0__124_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.rar\$" 0
+        __AF_match_regex28_v0__125_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.rpm\$" 0
+        __AF_match_regex28_v0__126_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.tar\$" 0
+        __AF_match_regex28_v0__127_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.xz\$" 0
+        __AF_match_regex28_v0__128_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.7z\$" 0
+        __AF_match_regex28_v0__129_13="$__AF_match_regex28_v0"
+        match_regex__28_v0 "${path}" "\.\(zip\|war\|jar\)\$" 0
+        __AF_match_regex28_v0__130_13="$__AF_match_regex28_v0"
+        if [ "$__AF_match_regex28_v0__119_13" != 0 ]; then
+            tar xvjf "${path}" -C "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__120_13" != 0 ]; then
+            tar xzf "${path}" -C "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__121_13" != 0 ]; then
+            tar xJf "${path}" -C "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__122_13" != 0 ]; then
+            bunzip2 "${path}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__123_13" != 0 ]; then
+            dpkg-deb -xv "${path}" "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__124_13" != 0 ]; then
+            gunzip "${path}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__125_13" != 0 ]; then
+            unrar x "${path}" "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__126_13" != 0 ]; then
+            rpm2cpio "${path}" | cpio -idm
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__127_13" != 0 ]; then
+            tar xf "${path}" -C "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__128_13" != 0 ]; then
+            xz --decompress "${path}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__129_13" != 0 ]; then
+            7z -y "${path}" -o "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        elif [ "$__AF_match_regex28_v0__130_13" != 0 ]; then
+            unzip "${path}" -d "${target}"
+            __AS=$?
+            if [ $__AS != 0 ]; then
+                __AF_file_extract55_v0=''
+                return $__AS
+            fi
+        else
+            echo "Error: Unsupported file type"
+            __AF_file_extract55_v0=''
+            return 3
+        fi
+    else
+        echo "Error: File not found"
+        __AF_file_extract55_v0=''
+        return 2
+    fi
+}
+is_command__108_v0() {
+    local command=$1
+    [ -x "$(command -v ${command})" ]
+    __AS=$?
+    if [ $__AS != 0 ]; then
+        __AF_is_command108_v0=0
+        return 0
+    fi
+    __AF_is_command108_v0=1
+    return 0
+}
+file_download__150_v0() {
+    local url=$1
+    local path=$2
+    is_command__108_v0 "curl"
+    __AF_is_command108_v0__9_9="$__AF_is_command108_v0"
+    is_command__108_v0 "wget"
+    __AF_is_command108_v0__12_9="$__AF_is_command108_v0"
+    is_command__108_v0 "aria2c"
+    __AF_is_command108_v0__15_9="$__AF_is_command108_v0"
+    if [ "$__AF_is_command108_v0__9_9" != 0 ]; then
+        curl -L -o "${path}" "${url}"
+        __AS=$?
+    elif [ "$__AF_is_command108_v0__12_9" != 0 ]; then
+        wget "${url}" -P "${path}"
+        __AS=$?
+    elif [ "$__AF_is_command108_v0__15_9" != 0 ]; then
+        aria2c "${url}" -d "${path}"
+        __AS=$?
+    else
+        __AF_file_download150_v0=0
+        return 0
+    fi
+    __AF_file_download150_v0=1
+    return 0
+}
+file_globstar__163_v0() {
+    local path=$1
+    shopt -q globstar
+    __AS=$?
+    local temp_globstar_enabled=$(echo $__AS '==' 0 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+    shopt -s globstar >/dev/null 2>&1
+    __AS=$?
+    __AMBER_VAL_13=$(eval "for file in ${path}; do [ -e \"\$file\" ] && echo \"\$file\"; done")
+    __AS=$?
+    if [ $__AS != 0 ]; then
+        __AF_file_globstar163_v0=()
+        return $__AS
+    fi
+    local files="${__AMBER_VAL_13}"
+    if [ ${temp_globstar_enabled} != 0 ]; then
+        shopt -s globstar >/dev/null 2>&1
+        __AS=$?
+    else
+        shopt -u globstar >/dev/null 2>&1
+        __AS=$?
+    fi
+    split_lines__15_v0 "${files}"
+    __AF_split_lines15_v0__21_12=("${__AF_split_lines15_v0[@]}")
+    __AF_file_globstar163_v0=("${__AF_split_lines15_v0__21_12[@]}")
+    return 0
+}
+__AMBER_ARRAY_14=("github.com")
+__0_available_repositories=("${__AMBER_ARRAY_14[@]}")
+__1_vendor_path=".jurrassic_park"
+imports__165_v0() {
+    local file=$1
+    __AMBER_ARRAY_15=()
+    local imports=("${__AMBER_ARRAY_15[@]}")
+    local partial_import=""
+    while IFS= read -r line; do
+        starts_with__31_v0 "${line}" "import"
+        __AF_starts_with31_v0__30_13="$__AF_starts_with31_v0"
+        text_contains__25_v0 "${line}" "\""
+        __AF_text_contains25_v0__30_45="$__AF_text_contains25_v0"
+        starts_with__31_v0 "${line}" "import"
+        __AF_starts_with31_v0__33_38="$__AF_starts_with31_v0"
+        if [ $(echo "$__AF_starts_with31_v0__30_13" '&&' "$__AF_text_contains25_v0__30_45" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+            __AMBER_ARRAY_16=("${line}")
+            imports+=("${__AMBER_ARRAY_16[@]}")
+        elif [ $(echo $(
+            [ "_${partial_import}" != "_" ]
+            echo $?
+        ) '&&' "$__AF_starts_with31_v0__33_38" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+            trim__20_v0 "${line}"
+            __AF_trim20_v0__34_35="${__AF_trim20_v0}"
+            partial_import+="${__AF_trim20_v0__34_35}"
+        elif [ $(
+            [ "_${partial_import}" == "_" ]
+            echo $?
+        ) != 0 ]; then
+            partial_import+="${line}"
+            text_contains__25_v0 "${partial_import}" "\""
+            __AF_text_contains25_v0__38_20="$__AF_text_contains25_v0"
+            if [ "$__AF_text_contains25_v0__38_20" != 0 ]; then
+                trim__20_v0 "${partial_import}"
+                __AF_trim20_v0__39_33="${__AF_trim20_v0}"
+                __AMBER_ARRAY_17=("${__AF_trim20_v0__39_33}")
+                imports+=("${__AMBER_ARRAY_17[@]}")
+                partial_import=""
+            fi
+        fi
+    done <"${file}"
+    __AF_imports165_v0=("${imports[@]}")
+    return 0
+}
+pkg_parse__166_v0() {
+    local text=$1
+    replace_regex__13_v0 "${text}" ".+from\s\"|\"" "" 1
+    __AF_replace_regex13_v0__49_12="${__AF_replace_regex13_v0}"
+    text="${__AF_replace_regex13_v0__49_12}"
+    split__14_v0 "${text}" "/"
+    __AF_split14_v0__50_20=("${__AF_split14_v0[@]}")
+    local tokens=("${__AF_split14_v0__50_20[@]}")
+    local length="${#tokens[@]}"
+    local url=("${tokens[@]:0:3}")
+    local version="${tokens[3]}"
+    local __SLICE_UPPER_18=${length}
+    local __SLICE_OFFSET_19=4
+    __SLICE_OFFSET_19=$((__SLICE_OFFSET_19 > 0 ? __SLICE_OFFSET_19 : 0))
+    local __SLICE_LENGTH_20=$(echo ${length} '-' $__SLICE_OFFSET_19 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+    __SLICE_LENGTH_20=$((__SLICE_LENGTH_20 > 0 ? __SLICE_LENGTH_20 : 0))
+    local path=("${tokens[@]:$__SLICE_OFFSET_19:$__SLICE_LENGTH_20}")
+    join__17_v0 url[@] "/"
+    __AF_join17_v0__57_9="${__AF_join17_v0}"
+    join__17_v0 path[@] "/"
+    __AF_join17_v0__59_9="${__AF_join17_v0}"
+    __AMBER_ARRAY_21=("${__AF_join17_v0__57_9}" "${version}" "${__AF_join17_v0__59_9}")
+    __AF_pkg_parse166_v0=("${__AMBER_ARRAY_21[@]}")
+    return 0
+}
+import_to_pkg__167_v0() {
+    local imp=$1
+    replace_regex__13_v0 "${imp}" ".+from\s\"|\"" "" 1
+    __AF_replace_regex13_v0__64_12="${__AF_replace_regex13_v0}"
+    __AF_import_to_pkg167_v0="${__AF_replace_regex13_v0__64_12}"
+    return 0
+}
+is_external_package__168_v0() {
+    local pkg=$1
+    ends_with__32_v0 "${pkg}" ".ab"
+    __AF_ends_with32_v0__68_12="$__AF_ends_with32_v0"
+    if [ $(echo '!' "$__AF_ends_with32_v0__68_12" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+        __AF_is_external_package168_v0=0
+        return 0
+    fi
+    for repo in "${__0_available_repositories[@]}"; do
+        text_contains__25_v0 "${pkg}" "${repo}"
+        __AF_text_contains25_v0__71_12="$__AF_text_contains25_v0"
+        if [ "$__AF_text_contains25_v0__71_12" != 0 ]; then
+            __AF_is_external_package168_v0=1
+            return 0
+        fi
+    done
+    __AF_is_external_package168_v0=0
+    return 0
+}
+imports_to_external_pkg__170_v0() {
+    local imports=("${!1}")
+    __AMBER_ARRAY_22=()
+    local pkgs=("${__AMBER_ARRAY_22[@]}")
+    for imp in "${imports[@]}"; do
+        import_to_pkg__167_v0 "${imp}"
+        __AF_import_to_pkg167_v0__89_21="${__AF_import_to_pkg167_v0}"
+        local pkg="${__AF_import_to_pkg167_v0__89_21}"
+        is_external_package__168_v0 "${pkg}"
+        __AF_is_external_package168_v0__90_12="$__AF_is_external_package168_v0"
+        if [ "$__AF_is_external_package168_v0__90_12" != 0 ]; then
+            __AMBER_ARRAY_23=("${pkg}")
+            pkgs+=("${__AMBER_ARRAY_23[@]}")
+        fi
+    done
+    __AF_imports_to_external_pkg170_v0=("${pkgs[@]}")
+    return 0
+}
+pkg_download__171_v0() {
+    local url=$1
+    local version=$2
+    replace_regex__13_v0 "${url}" ".+/" "" 1
+    __AF_replace_regex13_v0__97_18="${__AF_replace_regex13_v0}"
+    local name="${__AF_replace_regex13_v0__97_18}"
+    echo "${name}"
+    # If release exists
+    # TODO
+    # else download the all files
+    mkdir -p "${__1_vendor_path}/${url}/${name}-${version}/"
+    __AS=$?
+    file_download__150_v0 "https://${url}/archive/refs/heads/${version}.tar.gz" "${__1_vendor_path}/${url}/${version}.tar.gz"
+    __AF_file_download150_v0__103_5="$__AF_file_download150_v0"
+    echo "$__AF_file_download150_v0__103_5" >/dev/null 2>&1
+    file_extract__55_v0 "${__1_vendor_path}/${url}/${version}.tar.gz" "${__1_vendor_path}/${url}/${name}-${version}"
+    __AS=$?
+    __AF_file_extract55_v0__104_11="$__AF_file_extract55_v0"
+    echo "$__AF_file_extract55_v0__104_11" >/dev/null 2>&1
+    mv "${__1_vendor_path}/${url}/${name}-${version}/${name}-${version}" "${__1_vendor_path}/${url}/${version}/"
+    __AS=$?
+    rm "${__1_vendor_path}/${url}/${version}.tar.gz"
+    __AS=$?
+    rmdir "${__1_vendor_path}/${url}/${name}-${version}"
+    __AS=$?
+}
+install_command__172_v0() {
+    local args=("${!1}")
+    local path="."
+    i=0
+    for arg in "${args[@]}"; do
+        starts_with__31_v0 "${arg}" "--"
+        __AF_starts_with31_v0__113_27="$__AF_starts_with31_v0"
+        if [ $(echo $(echo ${i} '!=' 0 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') '&&' $(echo '!' "$__AF_starts_with31_v0__113_27" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+            path="${arg}"
+        fi
+        ((i++)) || true
+    done
+    file_globstar__163_v0 "${path}/**/*.ab"
+    __AS=$?
+    __AF_file_globstar163_v0__116_25=("${__AF_file_globstar163_v0[@]}")
+    local files=("${__AF_file_globstar163_v0__116_25[@]}")
+    for file in "${files[@]}"; do
+        imports__165_v0 "${file}"
+        __AF_imports165_v0__118_25=("${__AF_imports165_v0[@]}")
+        local imports=("${__AF_imports165_v0__118_25[@]}")
+        imports_to_external_pkg__170_v0 imports[@]
+        __AF_imports_to_external_pkg170_v0__119_20=("${__AF_imports_to_external_pkg170_v0[@]}")
+        for pkg in "${__AF_imports_to_external_pkg170_v0__119_20[@]}"; do
+            pkg_parse__166_v0 "${pkg}"
+            __AF_pkg_parse166_v0__120_32=("${__AF_pkg_parse166_v0[@]}")
+            local parsed_pkg=("${__AF_pkg_parse166_v0__120_32[@]}")
+            local url="${parsed_pkg[0]}"
+            local version="${parsed_pkg[1]}"
+            local pkg_path="${parsed_pkg[2]}"
+            dir_exists__43_v0 "${__1_vendor_path}/${url}/${version}/${pkg_path}"
+            __AF_dir_exists43_v0__124_20="$__AF_dir_exists43_v0"
+            if [ $(echo '!' "$__AF_dir_exists43_v0__124_20" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+                pkg_download__171_v0 "${url}" "${version}"
+                __AF_pkg_download171_v0__125_17="$__AF_pkg_download171_v0"
+                echo "$__AF_pkg_download171_v0__125_17" >/dev/null 2>&1
+            fi
+            file_exists__44_v0 "${file}/../${url}/${version}/${pkg_path}"
+            __AF_file_exists44_v0__127_20="$__AF_file_exists44_v0"
+            if [ $(echo '!' "$__AF_file_exists44_v0__127_20" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+                __AMBER_VAL_24=$(dirname ${file})
+                __AS=$?
+                local dest="${__AMBER_VAL_24}"
+                mkdir -p "${dest}/${url}"
+                __AS=$?
+                ln -s "$PWD/${__1_vendor_path}/${url}/${version}" "$PWD/${dest}/${url}/"
+                __AS=$?
+            fi
+        done
+    done
+}
+init_command__177_v0() {
+    local args=("${!1}")
+    local gitignore="jurrasic_park
+**/github.com"
+    file_exists__44_v0 ".gitignore"
+    __AF_file_exists44_v0__10_8="$__AF_file_exists44_v0"
+    if [ "$__AF_file_exists44_v0__10_8" != 0 ]; then
+        file_append__47_v0 ".gitignore" "${gitignore}"
+        __AS=$?
+        if [ $__AS != 0 ]; then
+            __AF_init_command177_v0=''
+            return $__AS
+        fi
+        __AF_file_append47_v0__11_9="${__AF_file_append47_v0}"
+        echo "${__AF_file_append47_v0__11_9}" >/dev/null 2>&1
+    else
+        file_write__46_v0 ".gitignore" "${gitignore}"
+        __AS=$?
+        if [ $__AS != 0 ]; then
+            __AF_init_command177_v0=''
+            return $__AS
+        fi
+        __AF_file_write46_v0__13_9="${__AF_file_write46_v0}"
+        echo "${__AF_file_write46_v0__13_9}" >/dev/null 2>&1
+    fi
+}
+print_help_message__180_v0() {
+    local code=$1
+    echo "Usage: jura [OPTIONS] [COMMAND]
+
+Commands:
+  init     Initialize a package
+  install  Install packages
+  update   update packages
+
+Options:
+    -h, --help  Print help"
+}
+declare -r argv=("$0" "$@")
+length="${#argv[@]}"
+array_contains__2_v0 argv[@] "-h"
+__AF_array_contains2_v0__57_9="$__AF_array_contains2_v0"
+array_contains__2_v0 argv[@] "--help"
+__AF_array_contains2_v0__57_39="$__AF_array_contains2_v0"
+if [ $(echo ${length} '==' 1 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+    print_help_message__180_v0 1
+    __AF_print_help_message180_v0__56_13="$__AF_print_help_message180_v0"
+    echo "$__AF_print_help_message180_v0__56_13" >/dev/null 2>&1
+elif [ $(echo "$__AF_array_contains2_v0__57_9" '||' "$__AF_array_contains2_v0__57_39" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//') != 0 ]; then
+    print_help_message__180_v0 0
+    __AF_print_help_message180_v0__58_13="$__AF_print_help_message180_v0"
+    echo "$__AF_print_help_message180_v0__58_13" >/dev/null 2>&1
+fi
+i=0
+for arg in "${argv[@]}"; do
+    if [ $(
+        [ "_${arg}" != "_install" ]
+        echo $?
+    ) != 0 ]; then
+        __SLICE_UPPER_25=${length}
+        __SLICE_OFFSET_26=${i}
+        __SLICE_OFFSET_26=$((__SLICE_OFFSET_26 > 0 ? __SLICE_OFFSET_26 : 0))
+        __SLICE_LENGTH_27=$(echo ${length} '-' $__SLICE_OFFSET_26 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+        __SLICE_LENGTH_27=$((__SLICE_LENGTH_27 > 0 ? __SLICE_LENGTH_27 : 0))
+        sub_argv=("${argv[@]:$__SLICE_OFFSET_26:$__SLICE_LENGTH_27}")
+        install_command__172_v0 sub_argv[@]
+        __AF_install_command172_v0__64_17="$__AF_install_command172_v0"
+        echo "$__AF_install_command172_v0__64_17" >/dev/null 2>&1
+    elif [ $(
+        [ "_${arg}" != "_init" ]
+        echo $?
+    ) != 0 ]; then
+        __SLICE_UPPER_28=${length}
+        __SLICE_OFFSET_29=${i}
+        __SLICE_OFFSET_29=$((__SLICE_OFFSET_29 > 0 ? __SLICE_OFFSET_29 : 0))
+        __SLICE_LENGTH_30=$(echo ${length} '-' $__SLICE_OFFSET_29 | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')
+        __SLICE_LENGTH_30=$((__SLICE_LENGTH_30 > 0 ? __SLICE_LENGTH_30 : 0))
+        sub_argv=("${argv[@]:$__SLICE_OFFSET_29:$__SLICE_LENGTH_30}")
+        init_command__177_v0 sub_argv[@]
+        __AS=$?
+        if [ $__AS != 0 ]; then
+
+            exit $__AS
+        fi
+        __AF_init_command177_v0__68_17="$__AF_init_command177_v0"
+        echo "$__AF_init_command177_v0__68_17" >/dev/null 2>&1
+    fi
+    ((i++)) || true
+done

@@ -1,0 +1,134 @@
+import {
+    file_extract,
+    file_exists,
+    dir_exists,
+    symlink_create,
+} from "std/fs"
+import { file_download } from "std/http"
+import {
+    replace_regex,
+    ends_with,
+    starts_with,
+    split,
+    join,
+    text_contains,
+    trim,
+} from "std/text"
+import { echo_error } from "std/env"
+import { file_globstar } from "github.com/lens0021/amber-snippets/main/main.ab"
+
+const available_repositories = [
+    "github.com",
+]
+const vendor_path = ".jurrassic_park"
+
+fun imports(file: Text): [Text] {
+    let imports = [Text]
+    let partial_import = ""
+    for line in lines(file){
+        if {
+            starts_with(line, "import") and text_contains(line, "\""){
+                imports += [line]
+            }
+            partial_import == "" and starts_with(line, "import") {
+                partial_import += trim(line)
+            } 
+            partial_import != ""  {
+                partial_import += line
+                if text_contains(partial_import, "\"") {
+                    imports += [trim(partial_import)]
+                    partial_import = ""
+                }   
+            }
+        }
+    }
+    return imports
+}
+
+pub fun pkg_parse(text: Text): [Text] {
+    text = replace_regex(text, ".+from\s\"|\"", "", true)
+    const tokens = split(text, "/")
+    const length = len(tokens)
+    const url = tokens[0..3]
+    const version = tokens[3]
+    const path = tokens[4..length]
+
+    return [
+        join(url, "/"),
+        version,
+        join(path, "/"),
+    ]
+}
+
+fun import_to_pkg(imp: Text): Text {
+    return replace_regex(imp, ".+from\s\"|\"", "", true)
+}
+
+fun is_external_package(pkg: Text): Bool {
+    if not ends_with(pkg, ".ab"):
+        return false
+    for repo in available_repositories {
+        if text_contains(pkg, repo):
+            return true
+    }
+    return false
+}
+
+fun filter_external_packages(pkgs: [Text]): [Text] {
+    let result = [Text]
+    for pkg in pkgs {
+        if is_external_package(pkg):
+            result += [pkg]
+    }
+    return result
+}
+
+fun imports_to_external_pkg(imports: [Text]): [Text] {
+    let pkgs = [Text]
+    for imp in imports {
+        const pkg = import_to_pkg(imp)
+        if is_external_package(pkg):
+            pkgs += [pkg]
+    }
+    return pkgs
+}
+
+fun pkg_download(url: Text, version: Text): Null {
+    const name = replace_regex(url, ".+/", "", true)
+    echo name
+    // If release exists
+    // TODO
+    // else download the all files
+    trust $ mkdir -p \"{vendor_path}/{url}/{name}-{version}/\" $
+    file_download("https://{url}/archive/refs/heads/{version}.tar.gz", "{vendor_path}/{url}/{version}.tar.gz")
+    trust file_extract("{vendor_path}/{url}/{version}.tar.gz", "{vendor_path}/{url}/{name}-{version}")
+    trust $ mv \"{vendor_path}/{url}/{name}-{version}/{name}-{version}\" \"{vendor_path}/{url}/{version}/\" $
+    trust $ rm \"{vendor_path}/{url}/{version}.tar.gz\" $
+    trust $ rmdir \"{vendor_path}/{url}/{name}-{version}\" $
+}
+
+pub fun install_command(args: [Text]): Null {
+    let path = "."
+    for i, arg in args {
+        if i != 0 and not starts_with(arg, "--"):
+            path = arg
+    }
+    const files = trust file_globstar("{path}/**/*.ab")
+    for file in files {
+        const imports = imports(file)
+        for pkg in imports_to_external_pkg(imports) {
+            const parsed_pkg = pkg_parse(pkg)
+            const url = parsed_pkg[0]
+            const version = parsed_pkg[1]
+            const pkg_path = parsed_pkg[2]
+            if not dir_exists("{vendor_path}/{url}/{version}/{pkg_path}") {
+                pkg_download(url, version)
+            }
+            if not file_exists("{file}/../{url}/{version}/{pkg_path}") {
+                const dest = trust $ dirname {file} $
+                trust $ mkdir -p \"{dest}/{url}\" $
+                trust $ ln -s \"\$PWD/{vendor_path}/{url}/{version}\" \"\$PWD/{dest}/{url}/\" $
+            }
+        }
+    }
+}

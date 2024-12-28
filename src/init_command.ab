@@ -1,0 +1,14 @@
+import {
+    file_append,
+    file_exists,
+    file_write,
+} from "std/fs"
+
+pub fun init_command(args: [Text]): Null? {
+    const gitignore = "jurrasic_park
+**/github.com"
+    if file_exists(".gitignore"):
+        file_append(".gitignore", gitignore)?
+    else:
+        file_write(".gitignore", gitignore)?
+}

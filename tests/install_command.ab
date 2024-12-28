@@ -1,0 +1,10 @@
+import * from "../src/install_command.ab"
+import * from "github.com/lens0021/testchamber/main/asserts.ab"
+
+pub fun test_pkg_parse(): Null? {
+    let parsed = pkg_parse("github.com/foo/bar/main/main.ab")
+    assert_eq(parsed[0], "github.com/foo/bar")?
+    assert_eq(parsed[1], "main")?
+    assert_eq(parsed[2], "main.ab")?
+}
+

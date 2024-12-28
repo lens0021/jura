@@ -1,0 +1,72 @@
+import {
+    array_contains,
+    array_find,
+} from "std/array"
+import { install_command } from "install_command.ab"
+import { init_command } from "init_command.ab"
+import { starts_with } from "std/text"
+
+fun print_help_message(code: Num): Null {
+    echo("Usage: jura [OPTIONS] [COMMAND]
+
+Commands:
+  init     Initialize a package
+  install  Install packages
+  update   update packages
+
+Options:
+    -h, --help  Print help")
+}
+
+fun options(args: [Text], global: Bool = true): [Text] {
+    const length = len(args)
+    if {
+        array_contains(args, "--") {
+            const two_dashes = array_find(args, "--")
+            if global {
+                return args[0..two_dashes]
+            } else {
+                return args[two_dashes+1..length]
+            }
+        }
+        else {
+            if global:
+                return args
+            let sub = false
+            let result = [Text]
+            for arg in args {
+                if sub and starts_with(arg, "-"):
+                    result += [arg]
+                if not sub and starts_with(arg, "-"):
+                    continue
+                if sub and not starts_with(arg, "-"):
+                    continue
+                if not sub and not starts_with(arg, "-"):
+                    sub = true
+            }
+            return result
+        }
+    }
+}
+
+main(argv) {
+    const length = len(argv)
+    if {
+        length == 1:
+            print_help_message(1)
+        array_contains(argv, "-h") or array_contains(argv, "--help"):
+            print_help_message(0)
+    }
+    for i, arg in argv {
+        if {
+            arg == "install" {
+                const sub_argv = argv[i..length]
+                install_command(sub_argv)
+            }
+            arg == "init" {
+                const sub_argv = argv[i..length]
+                init_command(sub_argv)?
+            }
+        }
+    }
+}
