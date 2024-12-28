@@ -1,4 +1,8 @@
 import {
+    array_pop,
+    array_contains,
+ } from "std/array"
+import {
     file_extract,
     file_exists,
     dir_exists,
@@ -22,7 +26,7 @@ const available_repositories = [
 ]
 const vendor_path = ".jurrassic_park"
 
-fun imports(file: Text): [Text] {
+fun imports_from_file(file: Text): [Text] {
     let imports = [Text]
     let partial_import = ""
     for line in lines(file){
@@ -83,7 +87,7 @@ fun filter_external_packages(pkgs: [Text]): [Text] {
     return result
 }
 
-fun imports_to_external_pkg(imports: [Text]): [Text] {
+fun imports_to_external_pkgs(imports: [Text]): [Text] {
     let pkgs = [Text]
     for imp in imports {
         const pkg = import_to_pkg(imp)
@@ -95,16 +99,51 @@ fun imports_to_external_pkg(imports: [Text]): [Text] {
 
 fun pkg_download(url: Text, version: Text): Null {
     const name = replace_regex(url, ".+/", "", true)
-    echo name
     // If release exists
     // TODO
     // else download the all files
-    trust $ mkdir -p \"{vendor_path}/{url}/{name}-{version}/\" $
-    file_download("https://{url}/archive/refs/heads/{version}.tar.gz", "{vendor_path}/{url}/{version}.tar.gz")
-    trust file_extract("{vendor_path}/{url}/{version}.tar.gz", "{vendor_path}/{url}/{name}-{version}")
-    trust $ mv \"{vendor_path}/{url}/{name}-{version}/{name}-{version}\" \"{vendor_path}/{url}/{version}/\" $
-    trust $ rm \"{vendor_path}/{url}/{version}.tar.gz\" $
-    trust $ rmdir \"{vendor_path}/{url}/{name}-{version}\" $
+    trust {
+        if dir_exists("{vendor_path}/{url}/{version}"):
+            return null
+        const temp = $ mktemp --directory jura-{name}.XXXXXXXXXX $
+        const archive_path = "{temp}/{version}.tar.gz"
+
+        file_download("https://{url}/archive/refs/heads/{version}.tar.gz", archive_path)
+
+        file_extract(archive_path, temp)
+        $ mkdir -p \"{vendor_path}/{url}/\" $
+        $ mv \"{temp}/{name}-{version}\" \"{vendor_path}/{url}/{version}/\" $
+        $ rm -rf \"{temp}\" $
+    }
+}
+
+fun install(path: Text): Null {
+    let files = trust file_globstar("{path}/**/*.ab")
+    let done_files = [Text]
+    loop {
+        if len(files) == 0:
+            break
+        const file = array_pop(files)
+        if array_contains(done_files, file):
+            continue
+        const imports = imports_from_file(file)
+        for pkg in imports_to_external_pkgs(imports) {
+            const parsed_pkg = pkg_parse(pkg)
+            const url = parsed_pkg[0]
+            const version = parsed_pkg[1]
+            const pkg_path = parsed_pkg[2]
+            if not dir_exists("{vendor_path}/{url}/{version}/{pkg_path}") {
+                pkg_download(url, version)
+                files += trust file_globstar("{vendor_path}/{url}/{version}/**/*.ab")
+            }
+            const dest = trust $ dirname {file} $
+            if not file_exists("{dest}/{url}/{version}/{pkg_path}") {
+                trust $ mkdir -p \"{dest}/{url}\" $
+                trust $ ln -s -f \"\$PWD/{vendor_path}/{url}/{version}\" \"\$PWD/{dest}/{url}/\" $
+            }
+        }
+        done_files += [file]
+    }
 }
 
 pub fun install_command(args: [Text]): Null {
@@ -113,22 +152,6 @@ pub fun install_command(args: [Text]): Null {
         if i != 0 and not starts_with(arg, "--"):
             path = arg
     }
-    const files = trust file_globstar("{path}/**/*.ab")
-    for file in files {
-        const imports = imports(file)
-        for pkg in imports_to_external_pkg(imports) {
-            const parsed_pkg = pkg_parse(pkg)
-            const url = parsed_pkg[0]
-            const version = parsed_pkg[1]
-            const pkg_path = parsed_pkg[2]
-            if not dir_exists("{vendor_path}/{url}/{version}/{pkg_path}") {
-                pkg_download(url, version)
-            }
-            if not file_exists("{file}/../{url}/{version}/{pkg_path}") {
-                const dest = trust $ dirname {file} $
-                trust $ mkdir -p \"{dest}/{url}\" $
-                trust $ ln -s \"\$PWD/{vendor_path}/{url}/{version}\" \"\$PWD/{dest}/{url}/\" $
-            }
-        }
-    }
+    echo "installing..."
+    install(path)
 }
