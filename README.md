@@ -1,6 +1,6 @@
 # Jura
 
-Jura is an experimental package manager for Amber.
+Jura is an experimental package manager for [Amber].
 
 ## Usage
 
@@ -21,6 +21,6 @@ jura install
 amber build src/jura.ab jura
 ```
 
-jura is required to build jura. Use the committed jura.
+Jura is required to build Jura. Use the committed jura file.
 
 [amber]: https://github.com/amber-lang/amber
