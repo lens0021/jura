@@ -1,0 +1,9 @@
+import * from "../src/jura_toml.ab"
+import * from "github.com/lens0021/testchamber/asserts.ab"
+
+pub fun test_version_of_pkg(): Null? {
+    const toml = "
+\"github.com/lens0021/amber-snippets\" = \"main\"
+"
+    assert_eq(trust version_of_pkg(toml, "github.com/lens0021/amber-snippets"), "main")?
+}

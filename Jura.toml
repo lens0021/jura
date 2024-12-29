@@ -1,0 +1,5 @@
+[dependencies]
+"github.com/lens0021/amber-snippets" = "main"
+
+[dev-dependencies]
+"github.com/lens0021/testchamber" = "main"

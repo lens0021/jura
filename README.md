@@ -7,13 +7,19 @@ Jura is an experimental package manager for [Amber].
 Create `example.ab` file with the following content:
 
 ```ab
-import { file_globstar } from "github.com/lens0021/amber-snippets/main/main.ab"
+import { file_globstar } from "github.com/lens0021/amber-snippets/main.ab"
 
 echo trust file_globstar("**/*.ab")
 ```
 
-The form of path following `from` is `github.com/{repository_owner}/{repository}/{git_ref}/{path_to_file}/{file}`.
+The form of path following `from` is `github.com/{repository_owner}/{repository}/{{path_to_file}/{file}`.
 (Currently, only the public repositories on github.com are supported)
+
+And create `Jura.toml` file with the following content:
+```toml
+[dependencies]
+"github.com/lens0021/amber-snippets" = "main"
+```
 
 Then, run the Jura
 
