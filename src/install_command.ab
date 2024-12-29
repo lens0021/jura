@@ -1,11 +1,16 @@
 import {
+    find_path_to_jura_toml,
+    version_of_pkg,
+} from "jura_toml.ab"
+import {
     array_pop,
     array_contains,
  } from "std/array"
 import {
-    file_extract,
-    file_exists,
     dir_exists,
+    file_exists,
+    file_extract,
+    file_read,
     symlink_create,
 } from "std/fs"
 import { file_download } from "std/http"
@@ -19,7 +24,7 @@ import {
     trim,
 } from "std/text"
 import { echo_error } from "std/env"
-import { file_globstar } from "github.com/lens0021/amber-snippets/main/main.ab"
+import { file_globstar } from "github.com/lens0021/amber-snippets/main.ab"
 
 const available_repositories = [
     "github.com",
@@ -54,12 +59,10 @@ pub fun pkg_parse(text: Text): [Text] {
     const tokens = split(text, "/")
     const length = len(tokens)
     const url = tokens[0..3]
-    const version = tokens[3]
-    const path = tokens[4..length]
+    const path = tokens[3..length]
 
     return [
         join(url, "/"),
-        version,
         join(path, "/"),
     ]
 }
@@ -120,6 +123,11 @@ fun pkg_download(url: Text, version: Text): Null {
 fun install(path: Text): Null {
     let files = trust file_globstar("{path}/**/*.ab")
     let done_files = [Text]
+    const toml_content = file_read(find_path_to_jura_toml() failed {
+        echo_error("Cannot find Jura.toml file")
+    }) failed {
+        echo_error("Reading Jura.toml file failed")
+    }
     loop {
         if len(files) == 0:
             break
@@ -130,8 +138,15 @@ fun install(path: Text): Null {
         for pkg in imports_to_external_pkgs(imports) {
             const parsed_pkg = pkg_parse(pkg)
             const url = parsed_pkg[0]
-            const version = parsed_pkg[1]
-            const pkg_path = parsed_pkg[2]
+            const pkg_path = parsed_pkg[1]
+            const toml_content = file_read(find_path_to_jura_toml(trust $ dirname {file} $) failed {
+                echo_error("Cannot find Jura.toml file")
+            }) failed {
+                echo_error("Reading Jura.toml file failed")
+            }
+            const version = version_of_pkg(toml_content, url) failed {
+                echo_error("No entry found at Jura.toml\nPlease add {url} in your Jura.toml")
+            }
             if not dir_exists("{vendor_path}/{url}/{version}/{pkg_path}") {
                 pkg_download(url, version)
                 files += trust file_globstar("{vendor_path}/{url}/{version}/**/*.ab")

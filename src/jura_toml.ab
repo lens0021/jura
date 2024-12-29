@@ -1,0 +1,32 @@
+import { file_exists } from "std/fs"
+import {
+    match_regex,
+    replace_regex,
+    split_lines,
+} from "std/text"
+
+const jura_toml_name = "Jura.toml"
+
+pub fun find_path_to_jura_toml(path: Text = ""): Text? {
+    let wd = path == "" then trust $ pwd $ else path
+    wd = trust $ realpath {wd} $
+    loop {
+        if file_exists("{wd}/{jura_toml_name}"):
+            return "{wd}/{jura_toml_name}"
+        if wd == "/":
+            break
+
+        wd = trust $ dirname {wd} $
+    }
+    fail 1
+}
+
+pub fun version_of_pkg(toml_content: Text, pkg_url: Text): Text? {
+    for line in split_lines(toml_content) {
+        if match_regex(line, "\"?{pkg_url}\"?\s*=\s*\".+\"", true) {
+            return replace_regex(replace_regex(line, "^.+=\s*\"?", "", true), "\"$", "")
+        }
+    }
+
+    fail 1
+}
