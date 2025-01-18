@@ -2,6 +2,9 @@
 
 Jura is an experimental package manager for [Amber].
 
+> [!CAUTION]
+> Jura uses the symbolic links, so it shouldn't be functional on Windows.
+
 ## Example
 
 Create `example.ab` file with the following content:
