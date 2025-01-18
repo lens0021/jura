@@ -24,6 +24,7 @@ And create `Jura.toml` file with the following content:
 Then, run the Jura
 
 ```console
+$ jura init
 $ jura install
 ```
 
@@ -37,7 +38,12 @@ amber run example.ab
 
 Download the [`jura`](./jura) file to one of your `$PATH`s.
 
-## Build
+## How?
+
+Jura downloads the requested packages and creates symbolic links to them, so that Amber treats the symbolic linked files as ordinary amber files.
+So, the downloaded files and symbolic links in your working directory should be listed in your `.gitignore` file. You can do this with `jura init`
+
+## Build from source
 
 ```
 jura install
