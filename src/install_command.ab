@@ -155,7 +155,7 @@ fun install(path: Text): Null {
             if not file_exists("{dest}/{url}/{pkg_path}") {
                 trust $ mkdir -p \"{dest}/{url}\" $
                 trust $ rmdir \"{dest}/{url}\" $
-                trust $ ln -s -f \"\$PWD/{vendor_path}/{url}/{version}\" \"\$PWD/{dest}/{url}/\" $
+                trust $ ln -s -f \"\$PWD/{vendor_path}/{url}/{version}\" \"\$PWD/{dest}/{url}\" $
             }
         }
         done_files += [file]
