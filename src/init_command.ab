@@ -5,7 +5,7 @@ import {
 } from "std/fs"
 
 pub fun init_command(args: [Text]): Null? {
-    const gitignore = "jurrasic_park
+    const gitignore = "jurassic_park
 **/github.com"
     if file_exists(".gitignore"):
         file_append(".gitignore", gitignore)?
