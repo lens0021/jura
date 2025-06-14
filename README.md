@@ -19,6 +19,7 @@ The form of path following `from` is `github.com/{repository_owner}/{repository}
 (Currently, only the public repositories on github.com are supported)
 
 And create `Jura.toml` file with the following content:
+
 ```toml
 [dependencies]
 "github.com/lens0021/amber-snippets" = "main"
@@ -26,9 +27,9 @@ And create `Jura.toml` file with the following content:
 
 Then, run the Jura
 
-```console
-$ jura init
-$ jura install
+```bash
+jura init
+jura install
 ```
 
 Now you can run your script.
@@ -48,7 +49,7 @@ So, the downloaded files and symbolic links in your working directory should be 
 
 ## Build from source
 
-```
+```bash
 jura install
 amber build src/jura.ab jura
 ```
