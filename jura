@@ -504,7 +504,7 @@ fi
 }
 __AMBER_ARRAY_24=("github.com");
 __1_available_repositories=("${__AMBER_ARRAY_24[@]}")
-__2_vendor_path=".jurrassic_park"
+__2_vendor_path=".jurassic_park"
 imports_from_file__176_v0() {
     local file=$1
     __AMBER_ARRAY_25=();
@@ -767,7 +767,7 @@ done
 }
 init_command__189_v0() {
     local args=("${!1}")
-    local gitignore="jurrasic_park
+    local gitignore="jurassic_park
 **/github.com"
     file_exists__44_v0 ".gitignore";
     __AF_file_exists44_v0__10_8="$__AF_file_exists44_v0";

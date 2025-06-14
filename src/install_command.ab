@@ -29,7 +29,7 @@ import { file_globstar } from "github.com/lens0021/amber-snippets/main.ab"
 const available_repositories = [
     "github.com",
 ]
-const vendor_path = ".jurrassic_park"
+const vendor_path = ".jurassic_park"
 
 fun imports_from_file(file: Text): [Text] {
     let imports = [Text]
