@@ -1,0 +1,20 @@
+---
+name: Linter
+on: ["push", "pull_request"]
+permissions: read-all
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: super-linter/super-linter@v7
+        env:
+          GITHUB_TOKEN: secrets.GITHUB_TOKEN
